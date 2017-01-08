@@ -1,0 +1,50 @@
+server {
+    listen 443 ssl;
+
+    server_name %SERVER_NAME%;
+
+    ssl_certificate         /etc/nginx/conf/ssl/fullchain.pem;
+    ssl_certificate_key     /etc/nginx/conf/ssl/privatekey.pem;
+
+    #client certificate generated from API Gateway
+    ssl_client_certificate  /etc/nginx/conf/ssl/client.crt;
+    ssl_verify_client on;
+    #ssl_verify_client optional;
+
+    ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+
+    add_header Strict-Transport-Security max-age=63072000;
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    default_type "text/plain;charset=UTF-8";
+    
+    location ~ "^/v1/(.+)" {
+        rewrite /v1/(.*) /$1  break;
+        proxy_ssl_server_name   on;
+        proxy_ssl_protocols     TLSv1 TLSv1.1 TLSv1.2;
+        proxy_set_header        Host '%BACKEND_SERVER_NAME%';
+        proxy_pass              https://%BACKEND_SERVER_NAME%;
+    }
+
+    # toggle off the comments for whole site proxy
+    #location / {
+    #    proxy_ssl_server_name   on;
+    #    proxy_ssl_protocols     TLSv1 TLSv1.1 TLSv1.2;
+    #    proxy_set_header        Host '%BACKEND_SERVER_NAME%';
+    #    proxy_pass              https://%BACKEND_SERVER_NAME%;
+    #}
+
+
+	#location = /ec2/instance-id {
+	#	proxy_pass http://169.254.169.254/latest/meta-data/instance-id;
+	#}
+	#location = /ec2/az {
+	#	proxy_pass http://169.254.169.254/latest/meta-data/placement/availability-zone;
+	#}
+
+}
