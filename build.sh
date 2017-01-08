@@ -10,4 +10,5 @@ docker build \
 --build-arg PRIVATE_KEY=$PRIVATE_KEY \
 --build-arg CERT=$CERT \
 --build-arg CLIENT_CERT=$CLIENT_CERT \
--t $image_tag . -f $dockerfile
+-f $dockerfile \
+-t $image_tag . 
